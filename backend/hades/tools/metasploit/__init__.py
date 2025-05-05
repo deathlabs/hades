@@ -1,0 +1,1 @@
+from .msfconsole import msfconsole

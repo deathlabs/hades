@@ -1,0 +1,1 @@
+"""Defines the Secure Shell (SSH) utility as a HADES agent tool."""

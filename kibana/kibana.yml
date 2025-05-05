@@ -1,0 +1,4 @@
+server:
+  host: "0.0.0.0"
+elasticsearch:
+  hosts: [ "http://localhost:9200" ]

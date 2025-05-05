@@ -1,0 +1,15 @@
+cluster:
+  name: "hades"
+node:
+  name: "hades_node_01"
+discovery:
+  type: single-node
+network:
+  host: 0.0.0.0
+xpack:
+  license:
+    self_generated:
+      type: "basic"
+  security:
+    http.ssl:
+      enabled: false
