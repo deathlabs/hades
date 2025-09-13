@@ -15,7 +15,7 @@
 ENV ?= local
 
 # Set the "profile" to "core if an argument is not provided.
-PROFILE ?= core
+PROFILE ?= all
 
 # Load the specified environment file.
 ENV_FILE := .env.$(ENV)

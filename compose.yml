@@ -1,17 +1,7 @@
 services:
-  rabbitmq:
-    profiles: [ all, core, rabbitmq ]
-    build: rabbitmq
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/rabbitmq:${RABBITMQ_VERSION}
-    container_name: ${APP_NAME}-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    env_file:
-      - .env.local
 
   backend:
-    profiles: [ all, core, backend ]
+    profiles: [ all, backend ]
     build: backend
     image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/backend:${BACKEND_VERSION}
     container_name: ${APP_NAME}-backend
@@ -30,42 +20,13 @@ services:
     env_file:
       - .env.local
 
-  vllm:
-    profiles: [ all, vllm ]
-    build: vllm
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/vllm:${VLLM_VERSION}
-    container_name: ${APP_NAME}-vllm
+  rabbitmq:
+    profiles: [ all, rabbitmq ]
+    build: rabbitmq
+    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/rabbitmq:${RABBITMQ_VERSION}
+    container_name: ${APP_NAME}-rabbitmq
     ports:
-      - "8001:8001"
+      - "5672:5672"
+      - "15672:15672"
     env_file:
-      - .env.local
-
-  postgres:
-    profiles: [ all, postgres ]
-    build: postgres
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/postgres:${POSTGRES_VERSION}
-    container_name: ${APP_NAME}-postgres
-    ports:
-      - "5432:5432"
-    env_file:
-      - .env.local
-
-  elasticsearch:
-    profiles: [ all, observability, elasticsearch ]
-    build: elasticsearch
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/elasticsearch:${ELASTICSEARCH_VERSION}
-    container_name: ${APP_NAME}-elasticsearch
-    ports:
-      - "9200:9200"
-    env_file:
-      - .env.local
-
-  kibana:
-    profiles: [ all, observability, kibana ]
-    build: kibana
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/kibana:${KIBANA_VERSION}
-    container_name: ${APP_NAME}-kibana
-    ports:
-      - "9200:9200"
-    env_file:
-      - .env.local
+      - .env.loca
