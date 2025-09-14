@@ -23,6 +23,7 @@ class RabbitMQExchange:
         self.parameters = ConnectionParameters(
             host=broker.address,
             port=broker.port,
+            virtual_host="/",
             credentials=PlainCredentials(
                 username=environ["RABBITMQ_USERNAME"],
                 password=environ["RABBITMQ_PASSWORD"]
