@@ -12,20 +12,16 @@ const NAVIGATION: Navigation = [
     title: 'Main items',
   },
   {
-    title: 'Dashboard',
-    icon: <DashboardIcon />,
-  },
-  {
     segment: 'employees',
-    title: 'Employees',
+    title: 'Injects',
     icon: <PersonIcon />,
     pattern: 'employees{/:employeeId}*',
   },
 ];
 
 const BRANDING = {
-  title: "hades",
-  logo: <img src="assets/logo.png" alt="Logo"/>
+  title: "HADES",
+  logo: <img src="logo.png" alt="Logo"/>
 };
 
 const nonce = document
