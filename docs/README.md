@@ -1,6 +1,7 @@
 ## `hades`
 * [Containers](containers/README.md)
 * [Environment Variables](#environment-variables)
+* [Local Development](local-development/README.md)
 
 ## Environment Variables
 ```

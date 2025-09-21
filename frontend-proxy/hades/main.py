@@ -1,15 +1,15 @@
-import json
 import asyncio
 import contextlib
+import json
 import time
 from os import environ
 from typing import Any, Set
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pika.exceptions import StreamLostError, AMQPConnectionError
 from pydantic import BaseModel, ValidationError
 
 from hades.messages.rabbitmq import get_rabbitmq_config
-from pika.exceptions import StreamLostError, AMQPConnectionError
 
 
 class Command(BaseModel):
@@ -33,7 +33,6 @@ class FrontendProxy:
         while True:
             try:
                 environ["RABBITMQ_QUEUE_NAME"] = "gateway.ui"
-
                 self.rabbitmq = get_rabbitmq_config(
                     address=environ.get("RABBITMQ_BROKER_ADDRESS", "localhost"),
                     port=int(environ.get("RABBITMQ_BROKER_PORT", "5672")),
@@ -91,7 +90,6 @@ class FrontendProxy:
                 self.connected = False
                 time.sleep(2)
 
-
 websockets: Set[WebSocket] = set()
 proxy = FrontendProxy()
 
@@ -107,7 +105,6 @@ async def broadcast(evt: dict[str, Any]):
     for ws in dead:
         websockets.discard(ws)
 
-
 async def maybe_publish_json_to_broker(text: str) -> bool:
     """Try to parse a WebSocket message as a Command and publish to RabbitMQ."""
     try:
@@ -120,7 +117,6 @@ async def maybe_publish_json_to_broker(text: str) -> bool:
     except Exception as e:
         print(f"[Proxy] Failed to publish: {e}")
         return False
-
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
