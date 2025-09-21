@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import App from './App';
 import Layout from './layouts/dashboard';
 import DashboardPage from './pages';
-import EmployeesCrudPage from './pages/employees';
+import InjectsCrudPage from './pages/injects';
 
 
 const router = createBrowserRouter([
@@ -20,8 +20,8 @@ const router = createBrowserRouter([
             Component: DashboardPage,
           },
           {
-            path: 'employees/:employeeId?/*',
-            Component: EmployeesCrudPage,
+            path: 'injects/:injectId?/*',
+            Component: InjectsCrudPage,
           },
         ],
       },

@@ -8,7 +8,7 @@ export default function HomePage() {
   return (    
     <PageContainer>
       <Typography>
-        Welcome to Toolpad Core!
+        Welcome to HADES!
       </Typography>
     </PageContainer>
   );

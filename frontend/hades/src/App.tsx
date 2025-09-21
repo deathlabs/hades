@@ -12,10 +12,10 @@ const NAVIGATION: Navigation = [
     title: 'Main items',
   },
   {
-    segment: 'employees',
+    segment: 'injects',
     title: 'Injects',
     icon: <PersonIcon />,
-    pattern: 'employees{/:employeeId}*',
+    pattern: 'injects{/:injectId}*',
   },
 ];
 
