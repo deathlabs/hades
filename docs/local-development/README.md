@@ -29,15 +29,6 @@ export RABBITMQ_PASSWORD="hades"
 python -m hades.main server
 ```
 
-### `frontend-proxy`
-Open a new terminal window and enter the commands below.
-```bash
-cd frontend-proxy
-source .venv/bin/activate
-pip install -r requirements.txt 
-RABBITMQ_USERNAME="hades" RABBITMQ_PASSWORD="hades" uvicorn hades.main:app --host 0.0.0.0 --port 5174
-```
-
 ### `frontend`
 Open a new terminal window and enter the commands below.
 ```bash

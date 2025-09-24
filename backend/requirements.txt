@@ -1,5 +1,7 @@
 autogen
 autogen-agentchat~=0.2
 autogen-ext[openai]
+fastapi
 pika
 pygments
+uvicorn

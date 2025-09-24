@@ -3,8 +3,10 @@
 # Standard library imports.
 from json import loads
 from logging import Logger
+from time import sleep
 from typing import Any, Callable, Dict, List
 from os import environ
+from uuid import uuid4
 from warnings import filterwarnings
 
 # Supress warnings about flaml.automl not being installed.
@@ -15,7 +17,10 @@ filterwarnings("ignore", category=UserWarning, module="autogen")
 
 # Third-party imports.
 from autogen import filter_config, register_function, UserProxyAgent
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pika.exceptions import StreamLostError
+import uvicorn
 
 # Local imports.
 from .task_matrix import get_task_matrix
@@ -23,6 +28,17 @@ from hades.agents import HadesOperator, HadesPlanner
 from hades.core import USER_PROXY_AGENT_NAME
 from hades.messages.rabbitmq import RabbitMQConfig
 
+app = FastAPI()
+app.add_middleware(
+    middleware_class=CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["POST"],
+)
+@app.post("/")
+async def root(request: Request):
+    data = await request.json()
+    sleep(3)
+    return {"uuid": uuid4(), "received": data, "note": "Got your mission!"}
 
 class HadesServer:
     """Responds to cyber inject requests.
@@ -205,13 +221,7 @@ class HadesServer:
         """
         Text goes here.
         """
-        self.logger.info("started the HADES server")
-        while True:
-            try:
-                self.rabbitmq.consumer.Consume()
-            except StreamLostError as error:
-                self.logger.error(error)
-                break
+        uvicorn.run(app, host="0.0.0.0", port=8888)
 
     def Demo(self, request):
         """

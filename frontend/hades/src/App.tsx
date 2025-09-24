@@ -1,5 +1,6 @@
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import PersonIcon from '@mui/icons-material/Person';
+import AddIcon from '@mui/icons-material/Add';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import { Outlet } from 'react-router';
 import { ReactRouterAppProvider } from '@toolpad/core/react-router';
 import type { Navigation } from '@toolpad/core/AppProvider';
@@ -9,13 +10,19 @@ import createCache from '@emotion/cache';
 const NAVIGATION: Navigation = [
   {
     kind: 'header',
-    title: 'Main items',
+    title: 'Injects',
   },
   {
     segment: 'injects',
-    title: 'Injects',
-    icon: <PersonIcon />,
+    title: 'Submit',
+    icon: <AddIcon />,
     pattern: 'injects{/:injectId}*',
+  },
+  {
+    segment: 'list-injects',
+    title: 'List',
+    icon: <FormatListNumberedIcon />,
+    pattern: 'injects/',
   },
 ];
 
