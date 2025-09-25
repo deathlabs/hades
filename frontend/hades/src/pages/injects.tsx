@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -11,16 +11,17 @@ import {
   SelectChangeEvent,
   TextField,
 } from "@mui/material";
-import Chip from '@mui/material/Chip';
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import StepContent from "@mui/material/StepContent";
-import Alert from '@mui/material/Alert';
+import Alert from "@mui/material/Alert";
 import { AlertColor } from "@mui/material/Alert";
-import IconButton from '@mui/material/IconButton';
-import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
+import Collapse from '@mui/material/Collapse';
+import Chip from "@mui/material/Chip";
+import IconButton from '@mui/material/IconButton';
+import Step from "@mui/material/Step";
+import StepContent from "@mui/material/StepContent";
+import StepLabel from "@mui/material/StepLabel";
+import Stepper from "@mui/material/Stepper";
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -47,15 +48,7 @@ const Techniques = [
   { key: "denial-of-service-attacks", value: "Denial of Service attacks" },
 ]
 
-const DefaultInjectId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-
 const DefaultAlertSeverity = "info";
-
-type ReportingRequirement = {
-  requirement: string;
-  channel: string;
-  frequency: string;
-};
 
 type Target = {
   type: string;
@@ -70,15 +63,11 @@ type System = {
 };
 
 type Inject = {
-  id: string;
   name: string;
   rules_of_engagement: {
     techniques: {
       allowed: string[];
       prohibited: string[];
-    };
-    reporting: {
-      requirements: ReportingRequirement[];
     };
   };
   systems: System[];
@@ -94,8 +83,7 @@ export default function InjectsCrudPage() {
   const [goals, setGoals] = useState<string[]>([Goals[0].value]);
   const [allowed, setAllowed] = useState<string[]>([Techniques[0].value]);
   const [prohibited, setProhibited] = useState<string[]>([Techniques[Techniques.length - 1].value]);
-
-  const [injectId, setInjectId] = useState(DefaultInjectId);
+  const hasConflict = allowed.some(v => prohibited.includes(v));
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>(DefaultAlertSeverity);
@@ -103,11 +91,16 @@ export default function InjectsCrudPage() {
   const [showAlert, setShowAlert] = useState(false);
  
   const handleNext = () => {
+    setShowAlert(false);
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    resetForm();
   };
 
   const handleGoals = (event: SelectChangeEvent<typeof goals>) => {
@@ -141,29 +134,27 @@ export default function InjectsCrudPage() {
     setGoals([Goals[0].value]);
     setAllowed([Techniques[0].value]);
     setProhibited([Techniques[Techniques.length - 1].value]);
-    setInjectId(DefaultInjectId);
-    setAlertSeverity(DefaultAlertSeverity);
-    setAlertMessage("");
   };
+
+  useEffect(() => {
+    if (hasConflict) {
+      setAlertSeverity("error");
+      setAlertMessage("A technique cannot be both allowed and prohibited.");
+      setShowAlert(true);
+    } else if (alertSeverity === "error") {
+      setShowAlert(false);
+      setAlertMessage("");
+    }
+  }, [allowed, prohibited]);
 
   const submitInject = async () => {
     setLoading(true);
     const inject: Inject = {
-      id: injectId,
       name: injectName,
       rules_of_engagement: {
         techniques: {
           allowed: allowed,
           prohibited: prohibited,
-        },
-        reporting: {
-          requirements: [
-            {
-              requirement: "",
-              channel: "",
-              frequency: "",
-            },
-          ],
         },
       },
       systems: [
@@ -195,12 +186,12 @@ export default function InjectsCrudPage() {
       }
 
       const text = await response.json();
-      setActiveStep(0);
-      setInjectId(text.uuid);
       setLoading(false);
+      setActiveStep(0);
       setAlertSeverity("success");
-      setAlertMessage(injectId);
+      setAlertMessage(`Inject ID: ${text.uuid}`);
       setShowAlert(true);
+      resetForm();
     } catch (err) {
       setLoading(false);
       setAlertSeverity("error");
@@ -265,7 +256,7 @@ export default function InjectsCrudPage() {
       </>
     },
     {
-      label: "Identify the Rules of Engagement",
+      label: "Identify the rules of engagement",
       content: <>
         <FormControl>
           <InputLabel>Goals</InputLabel>
@@ -345,26 +336,25 @@ export default function InjectsCrudPage() {
   ];
 
   return (
-    <Box sx={{ p: 2, ml: 2, mt: 0, display: "grid", gap: 2, maxWidth: 600 }}>
-      <Collapse in={showAlert}>
-        <Alert
-          severity={alertSeverity}
-          sx={{ m: 2 }}
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => { setShowAlert(false); }}
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
-          
-        >
-          {alertMessage}
-        </Alert>
-      </Collapse>
+    <Box sx={{ p: 2, ml: 2, mt: 1, display: "grid", gap: 2, maxWidth: 600 }}>
+                        <Collapse in={showAlert}>
+                    <Alert
+                      severity={alertSeverity}
+                      sx={{ m: 2 }}
+                      action={
+                        <IconButton
+                          aria-label="close"
+                          color="inherit"
+                          size="small"
+                          onClick={() => { setShowAlert(false); }}
+                        >
+                          <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                      }
+                    >
+                      {alertMessage}
+                    </Alert>
+                  </Collapse>
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((step, index) => (
           <Step key={step.label}>
@@ -372,11 +362,13 @@ export default function InjectsCrudPage() {
             <StepContent>
               <Card>
                 <CardContent sx={{ m: 2, display: "grid", gap: 2, maxWidth: 600 }}>
+
                   {step.content}
                   <Box sx={{ mb: 2 }}>
                     <Button
                       variant="contained"
                       loading={loading}
+                      disabled={hasConflict}
                       onClick={() => {
                         if (index === steps.length - 1) {
                           submitInject();
@@ -394,6 +386,12 @@ export default function InjectsCrudPage() {
                       sx={{ mt: 1, mr: 1 }}
                     >
                       Back
+                    </Button>
+                    <Button
+                      onClick={handleReset}
+                      sx={{ mt: 1, mr: 1 }}
+                    >
+                      Reset
                     </Button>
                   </Box>
                 </CardContent>
