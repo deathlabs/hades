@@ -1,4 +1,3 @@
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddIcon from '@mui/icons-material/Add';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import { Outlet } from 'react-router';
@@ -13,13 +12,13 @@ const NAVIGATION: Navigation = [
     title: 'Injects',
   },
   {
-    segment: 'injects',
+    segment: 'inject',
     title: 'Submit',
     icon: <AddIcon />,
-    pattern: 'injects{/:injectId}*',
+    pattern: 'inject',
   },
   {
-    segment: 'list-injects',
+    segment: 'injects',
     title: 'List',
     icon: <FormatListNumberedIcon />,
     pattern: 'injects/',

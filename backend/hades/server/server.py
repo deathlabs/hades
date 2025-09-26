@@ -1,23 +1,21 @@
 """Defines a HADES Server."""
 
 # Standard library imports.
-from json import loads
+from json import dumps, loads
 from logging import Logger
-from time import sleep
+from threading import Thread
 from typing import Any, Callable, Dict, List
 from os import environ
 from uuid import uuid4
 from warnings import filterwarnings
 
-# Supress warnings about flaml.automl not being installed.
+# Suppress warnings about flaml/autogen noise.
 filterwarnings("ignore", category=UserWarning, module="flaml")
-
-# Supress warnings about repetitive chat recipients.
 filterwarnings("ignore", category=UserWarning, module="autogen")
 
 # Third-party imports.
 from autogen import filter_config, register_function, UserProxyAgent
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pika.exceptions import StreamLostError
 import uvicorn
@@ -25,20 +23,80 @@ import uvicorn
 # Local imports.
 from .task_matrix import get_task_matrix
 from hades.agents import HadesOperator, HadesPlanner
-from hades.core import USER_PROXY_AGENT_NAME
-from hades.messages.rabbitmq import RabbitMQConfig
+from hades.core import (
+    get_logger,
+    LLM_TAGS,
+    RABBITMQ_REPORT_EXCHANGE_NAME,
+    RABBITMQ_REQUEST_EXCHANGE_NAME,
+    USER_PROXY_AGENT_NAME
+)
+from hades.messages.rabbitmq import get_rabbitmq_config, RabbitMQConfig
+from hades.tools import bash, hydra, msfconsole, nmap, ssh
 
-app = FastAPI()
-app.add_middleware(
+RABBITMQ_URL = environ.get("RABBITMQ_URL", "amqp://hades:hades@localhost:5672/")
+
+client_connections: Dict[str, WebSocket] = {}
+
+App = FastAPI()
+App.add_middleware(
     middleware_class=CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["POST"],
 )
-@app.post("/")
-async def root(request: Request):
+
+@App.post("/")
+async def publish_inject_request(request: Request):
     data = await request.json()
-    sleep(3)
-    return {"uuid": uuid4(), "received": data, "note": "Got your mission!"}
+    id = str(uuid4())
+    rabbitmq_config = get_rabbitmq_config(
+        address=environ["RABBITMQ_BROKER_ADDRESS"],
+        port=environ["RABBITMQ_BROKER_PORT"],
+        virtual_host="/",
+        username=environ["RABBITMQ_USERNAME"],
+        password=environ["RABBITMQ_PASSWORD"],
+        routing_key=id,
+        consumer_exchange_name=RABBITMQ_REPORT_EXCHANGE_NAME,
+        publisher_exchange_name=RABBITMQ_REQUEST_EXCHANGE_NAME
+    )
+    data["id"] = id
+    message = dumps(data)
+    print(f"publishing to {RABBITMQ_REQUEST_EXCHANGE_NAME}")
+    rabbitmq_config.publisher.Publish(message)
+    return {"id": id}
+
+@App.websocket("/ws/{id}")
+async def relay_inject_reports(websocket: WebSocket, id: str):
+    """WebSocket endpoint for a specific inject UUID."""
+    await websocket.accept()
+    client_connections[id] = websocket
+
+    rabbitmq_config = get_rabbitmq_config(
+        address=environ["RABBITMQ_BROKER_ADDRESS"],
+        port=environ["RABBITMQ_BROKER_PORT"],
+        virtual_host="/",
+        username=environ["RABBITMQ_USERNAME"],
+        password=environ["RABBITMQ_PASSWORD"],
+        routing_key=id,
+        consumer_exchange_name=RABBITMQ_REQUEST_EXCHANGE_NAME,
+        publisher_exchange_name=RABBITMQ_REPORT_EXCHANGE_NAME,
+    )
+    server = HadesServer(
+        logger=get_logger(name="hades_server", format="json"),
+        output_method="rabbitmq",
+        rabbitmq_config=rabbitmq_config,
+        llm_tag=LLM_TAGS[0],
+        tools=[nmap, msfconsole]
+    )
+
+    Thread(target=server.Start, daemon=True).start()
+
+    try:
+        while True:
+            await websocket.receive_text()
+    except Exception:
+        pass
+    finally:
+        client_connections.pop(id, None)
 
 class HadesServer:
     """Responds to cyber inject requests.
@@ -192,15 +250,15 @@ class HadesServer:
         # Parse the metadata provided.
         inject_id = request.get("id", 0)
         inject_name = request.get("name", "")
-        scenario = request.get("scenario", {})
+        scenario = {"address": "192.168.152.1"}
         systems = request.get("systems", [])
         self.logger.info(f"starting '{inject_name}' (Inject #{inject_id})")
-
         # Process the inject.
         for system in systems:
             # Process the provided list of high-value targets.
             # TODO: add code to handle situations where no high-value targets are provided.
-            for target in system["high-value-targets"]:
+            print(system)
+            for target in system["targets"]:
                 # Build a task list based on the target type (e.g., machine or user).
                 match target["type"]:
                     case "machine":
@@ -212,6 +270,7 @@ class HadesServer:
 
             # Task the HADES agents.
             # TODO: add code to trace the following activity.
+            print(task_list)
             self.user_proxy.initiate_chats(
                 chat_queue=task_list,
             )
@@ -221,35 +280,13 @@ class HadesServer:
         """
         Text goes here.
         """
-        uvicorn.run(app, host="0.0.0.0", port=8888)
-
-    def Demo(self, request):
-        """
-        Text goes here.
-        """
         self.logger.info("started the HADES server")
-        self.logger.info("received a request")
-
-        # Process the systems provided.
-        systems = request.get("systems", [])
-        for system in systems:
-            # TODO: add code to handle situations where no high-value targets are provided.
-
-            # Process the provided list of high-value targets.
-            for target in system["high-value-targets"]:
-                # Build a task list based on the target type.
-                match target["type"]:
-                    case "machine":
-                        address = target["address"]
-                        goal = target["goals"][0]
-                        task_list = self.__get_task_list(address, goal)
-                    case _:
-                        return None
-
-            # Give the task list to the HADES agents.
-            # TODO: start trace
-            self.user_proxy.initiate_chats(
-                chat_queue=task_list,
-            )
-            # TODO: end trace
-        self.logger.info("finished processing the request")
+        while True:
+            try:
+                self.rabbitmq.consumer.Consume()
+            except StreamLostError as error:
+                self.logger.error(error)
+                break
+       
+def Start():
+    uvicorn.run(App, host="0.0.0.0", port=8888)

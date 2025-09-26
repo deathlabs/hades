@@ -46,8 +46,4 @@ def get_task_matrix(scenario: dict, sender: HadesAgent, recipient: HadesAgent, t
             get_initial_access(sender, recipient, target),
             shutdown(sender, recipient, target),
         ],
-        "demo": [
-            get_scenario(sender, recipient, scenario),
-            demo(sender, recipient, target),
-        ],
     }

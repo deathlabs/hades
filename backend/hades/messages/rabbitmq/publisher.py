@@ -5,25 +5,30 @@ from typing import Callable
 
 # Local imports.
 from .broker import RabbitMQBroker
-from .client import RabbitMQClient
 from .exchange import RabbitMQExchange
 
 
-class RabbitMQPublisher(RabbitMQClient):
+class RabbitMQPublisher():
     def __init__(
         self,
         broker: RabbitMQBroker,
-        exchange: str,
-        handler: Callable
+        virtual_host: str,
+        username: str,
+        password: str,
+        exchange_name: str,
+        routing_key: str,
+        handler: Callable,
     ):
-        # TODO: add text to explain what this code block does.
         self.broker = broker
-
-        # TODO: add text to explain what this code block does.
+        self.handler = handler
         self.exchange = RabbitMQExchange(
-            name=exchange,
-            broker=self.broker,   
-            handler=handler
+            broker=self.broker,
+            virtual_host=virtual_host,
+            username=username,
+            password=password,
+            name=exchange_name,
+            routing_key=routing_key,
+            handler=self.handler
         )
 
     def Publish(self, message):

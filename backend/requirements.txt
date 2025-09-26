@@ -5,3 +5,4 @@ fastapi
 pika
 pygments
 uvicorn
+uvicorn[standard]

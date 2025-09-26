@@ -33,25 +33,30 @@ class RabbitMQConfig:
 def get_rabbitmq_config(
     address: str,
     port: int,
-    consumer_exchange: str,
-    publisher_exchange: str,
+    virtual_host: str,
+    username: str,
+    password: str,
+    routing_key: str,
+    consumer_exchange_name: str,
+    publisher_exchange_name: str,
 ):
-    # Init a broker.
     broker = RabbitMQBroker(address, port)
-
-    # Init a consumer.
     consumer = RabbitMQConsumer(
         broker=broker,
-        exchange=consumer_exchange,
+        virtual_host=virtual_host,
+        username=username,
+        password=password,
+        exchange_name=consumer_exchange_name,
+        routing_key=routing_key,
         handler=None,
     )
-
-    # Init a publisher.
     publisher = RabbitMQPublisher(
         broker=broker,
-        exchange=publisher_exchange,
+        virtual_host=virtual_host,
+        username=username,
+        password=password,
+        exchange_name=publisher_exchange_name,
+        routing_key=routing_key,
         handler=None,
     )
-
-    # Init the config.
     return RabbitMQConfig(broker, consumer, publisher)

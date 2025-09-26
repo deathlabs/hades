@@ -11,7 +11,7 @@ def get_scenario(
     sender: HadesAgent, recipient: HadesAgent, scenario: dict
 ) -> dict:
     # TODO: add code to include all fields of the scenario in the message (description, RoE, etc.)
-    message = f"{scenario['description']} Your IP address is {scenario['ip-address']}."
+    message = f"Your IP address is {scenario['address']}."
     return {
         "sender": sender,
         "recipient": recipient,
