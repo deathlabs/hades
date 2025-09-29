@@ -1,0 +1,52 @@
+[
+  {
+    "sender": "HADES-Planner",
+    "receiver": "HADES-Operator",
+    "message": "Operator, status check on current mission?"
+  },
+  {
+    "sender": "HADES-Operator",
+    "receiver": "HADES-Planner",
+    "message": "Planner, mission is underway. Recon is in progress."
+  },
+  {
+    "sender": "HADES-Planner",
+    "receiver": "HADES-Operator",
+    "message": "Copy that. Any contact with target systems?"
+  },
+  {
+    "sender": "HADES-Operator",
+    "receiver": "HADES-Planner",
+    "message": "Affirmative, found an exposed service on the target subnet."
+  },
+  {
+    "sender": "HADES-Planner",
+    "receiver": "HADES-Operator",
+    "message": "Proceed with enumeration, but maintain stealth."
+  },
+  {
+    "sender": "HADES-Operator",
+    "receiver": "HADES-Planner",
+    "message": "Understood. Running scans with low-noise settings."
+  },
+  {
+    "sender": "HADES-Planner",
+    "receiver": "HADES-Operator",
+    "message": "Good. Report findings as soon as you confirm vulnerabilities."
+  },
+  {
+    "sender": "HADES-Operator",
+    "receiver": "HADES-Planner",
+    "message": "Discovered potential misconfiguration on port 22. Verifying."
+  },
+  {
+    "sender": "HADES-Planner",
+    "receiver": "HADES-Operator",
+    "message": "Log evidence and prepare a proof of concept, but hold execution."
+  },
+  {
+    "sender": "HADES-Operator",
+    "receiver": "HADES-Planner",
+    "message": "Acknowledged. Findings will be documented and sent shortly."
+  }
+]

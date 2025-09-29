@@ -16,6 +16,7 @@
     "react": "^19",
     "react-dom": "^19",
     "react-router": "^7",
+    "react-router-dom": "^7.9.3",
     "react-use-websocket": "^3.0.0",
     "zod": "^3.24.2"
   },

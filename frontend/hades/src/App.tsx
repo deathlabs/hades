@@ -12,10 +12,10 @@ const NAVIGATION: Navigation = [
     title: 'Injects',
   },
   {
-    segment: 'inject',
-    title: 'Submit',
+    segment: 'injects/new',
+    title: 'Create',
     icon: <AddIcon />,
-    pattern: 'inject',
+    pattern: 'injects/new',
   },
   {
     segment: 'injects',
@@ -27,7 +27,7 @@ const NAVIGATION: Navigation = [
 
 const BRANDING = {
   title: "HADES",
-  logo: <img src="logo.png" alt="Logo"/>
+  logo: <img src="/logo.png" alt="Logo"/>
 };
 
 const nonce = document

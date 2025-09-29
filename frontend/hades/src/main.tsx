@@ -4,8 +4,9 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import App from './App';
 import Layout from './layouts/dashboard';
 import Home from './pages/home';
-import Inject from './pages/inject';
-import Injects from './pages/injects';
+import Inject from './pages/Inject';
+import Injects from './pages/Injects';
+import InjectDetails from './pages/InjectDetails';
 
 
 const router = createBrowserRouter([
@@ -21,12 +22,16 @@ const router = createBrowserRouter([
             Component: Home,
           },
           {
-            path: 'inject',
+            path: 'injects/new',
             Component: Inject,
           },
           {
             path: 'injects/',
             Component: Injects,
+          },
+          {
+            path: 'injects/:id',
+            Component: InjectDetails,
           },
         ],
       },

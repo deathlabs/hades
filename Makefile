@@ -5,6 +5,21 @@
 .DEFAULT_GOAL := build
 
 # ---------------------------------------------------------
+# Install tools locally.
+# ---------------------------------------------------------
+
+.PHONY: install-tools
+.SILENT: install-tools
+
+install-tools:
+	sudo apt install -y nmap
+	curl -sS https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
+	chmod 755 msfinstall
+	./msfinstall
+	rm ./msfinstall
+	msfdb init
+
+# ---------------------------------------------------------
 # Load environment variables and secrets.
 # ---------------------------------------------------------
 

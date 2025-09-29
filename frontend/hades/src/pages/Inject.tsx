@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -22,9 +23,7 @@ import Step from "@mui/material/Step";
 import StepContent from "@mui/material/StepContent";
 import StepLabel from "@mui/material/StepLabel";
 import Stepper from "@mui/material/Stepper";
-
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { BACKEND } from "../constants";
 
 const DefaultInjectName = "Scan the network";
 
@@ -44,9 +43,9 @@ const Goals = [
 ]
 
 const Techniques = [
-  { key: "exploiting-known-vulnerabilities", value: "Exploiting known vulnerabilities" },
-  { key: "phishing-via-email", value: "Phishing via email" },
-  { key: "denial-of-service-attacks", value: "Denial of Service attacks" },
+  { key: "Exploiting known vulnerabilities", value: "exploiting-known-vulnerabilities" },
+  { key: "Phishing via email", value: "phishing-via-email" },
+  { key: "Denial-of-Service attacks", value: "denial-of-service-attacks" },
 ]
 
 const DefaultAlertSeverity = "info";
@@ -63,7 +62,7 @@ type System = {
   targets: Target[];
 };
 
-type Inject = {
+export type NewInject = {
   name: string;
   rules_of_engagement: {
     techniques: {
@@ -90,6 +89,7 @@ export default function Inject() {
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>(DefaultAlertSeverity);
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
+  const navigate = useNavigate();
  
   const handleNext = () => {
     setShowAlert(false);
@@ -150,7 +150,7 @@ export default function Inject() {
 
   const submitInject = async () => {
     setLoading(true);
-    const inject: Inject = {
+    const inject: NewInject = {
       name: injectName,
       rules_of_engagement: {
         techniques: {
@@ -174,7 +174,7 @@ export default function Inject() {
     };
 
     try {
-      const response = await fetch(`${BACKEND_URL}`, {
+      const response = await fetch(`http://${BACKEND}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -188,11 +188,7 @@ export default function Inject() {
 
       const text = await response.json();
       setLoading(false);
-      setActiveStep(0);
-      setAlertSeverity("success");
-      setAlertMessage(`injects?uuid=${text.id}`);
-      setShowAlert(true);
-      resetForm();
+      navigate(`/injects/${text.id}`);
     } catch (err) {
       setLoading(false);
       setAlertSeverity("error");
@@ -242,8 +238,8 @@ export default function Inject() {
             onChange={(e) => setTargetType(e.target.value)}
           >
             {TargetTypes.map((targetType) => (
-            <MenuItem key={targetType.key} value={targetType.value}>
-              {targetType.value}
+            <MenuItem key={targetType.value} value={targetType.value}>
+              {targetType.key}
             </MenuItem>
             ))}
           </Select>
@@ -276,8 +272,8 @@ export default function Inject() {
           )}
           >
             {Goals.map((goal) => (
-            <MenuItem key={goal.key} value={goal.value}>
-              {goal.value}
+            <MenuItem key={goal.value} value={goal.value}>
+              {goal.key}
             </MenuItem>
             ))}
           </Select>
@@ -299,8 +295,8 @@ export default function Inject() {
           )}
           >
             {Techniques.map((technique) => (
-            <MenuItem key={technique.key} value={technique.value}>
-              {technique.value}
+            <MenuItem key={technique.value} value={technique.value}>
+              {technique.key}
             </MenuItem>
             ))}
           </Select>
@@ -322,8 +318,8 @@ export default function Inject() {
           )}
           >
             {Techniques.map((technique) => (
-            <MenuItem key={technique.key} value={technique.value}>
-              {technique.value}
+            <MenuItem key={technique.value} value={technique.value}>
+              {technique.key}
             </MenuItem>
             ))}
           </Select>
@@ -353,10 +349,10 @@ export default function Inject() {
             </IconButton>
           }
         >
-          {alertMessage.startsWith("injects") ? (
-            <Link href={alertMessage}>
-              Injected submitted!
-            </Link>
+          {alertMessage.startsWith("inject-") ? (
+          <Link href={`/injects/${alertMessage.replace(/^inject-/, "")}`}>
+            Inject submitted!
+          </Link>
           ) : (
             alertMessage
           )}
@@ -369,7 +365,6 @@ export default function Inject() {
             <StepContent>
               <Card>
                 <CardContent sx={{ m: 2, display: "grid", gap: 2, maxWidth: 600 }}>
-
                   {step.content}
                   <Box sx={{ mb: 2 }}>
                     <Button

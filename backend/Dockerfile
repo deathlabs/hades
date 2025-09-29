@@ -8,4 +8,4 @@ RUN apk add --no-cache --update python3 py3-pip &&\
     adduser -D hades -h /home/hades &&\
     chown -R hades:hades /home/hades
 USER hades
-CMD [ "python", "-m", "hades.main", "server" ]
+CMD [ "uvicorn", "hades.main:api", "--host", "0.0.0.0", "--port", "8888" ]
