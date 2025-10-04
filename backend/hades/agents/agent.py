@@ -12,11 +12,15 @@ from autogen.io.base import IOStream
 from autogen.oai.client import OpenAIWrapper
 
 # Local imports.
-from hades.messages.rabbitmq import RabbitMQConfig
+from hades.core import get_timestamp
+from hades.messages.rabbitmq import RabbitMQClient
 
 
 class HadesAgentIOStream(IOStream):
-    def __init__(self, output_method: str, rabbitmq_config: RabbitMQConfig):
+    def __init__(self, rabbitmq_client: RabbitMQClient, output_method: str):
+        # Init the report client (assuming there is one).
+        self.rabbitmq_client = rabbitmq_client
+
         self.__output_methods = {
             "console": self.__print_to_console,
             "rabbitmq": self.__publish_to_rabbitmq,
@@ -27,14 +31,11 @@ class HadesAgentIOStream(IOStream):
         if self.output_method not in self.__output_methods:
             raise ValueError("invalid output method selected")    
 
-        # Init the report client (assuming there is one).
-        self.rabbitmq = rabbitmq_config
-
     def __print_to_console(self, report):
         print(report)
 
     def __publish_to_rabbitmq(self, report):
-        self.rabbitmq.publisher.Publish(report)
+        self.rabbitmq_client.Publish(report)
 
     def print(self, report) -> None:
         json_report = json.dumps(report)
@@ -72,21 +73,21 @@ class HadesAgent(ConversableAgent):
     def __init__(
         self,
         output_method: str,
-        rabbitmq_config: RabbitMQConfig,
+        rabbitmq_client: RabbitMQClient,
         *args,
         **kwargs
     ):
         # Set the IO stream.
         self.iostream = HadesAgentIOStream(
             output_method=output_method,
-            rabbitmq_config=rabbitmq_config,
+            rabbitmq_client=rabbitmq_client,
         )
         IOStream.set_default(stream=self.iostream)
         
         # TODO: add comment.
         super().__init__(*args, **kwargs)
 
-    def execute_function(self, func_call, verbose: bool = False) -> Tuple[bool, Dict[str, str]]:
+    def execute_function(self, func_call, call_id: str, verbose: bool = False) -> Tuple[bool, Dict[str, str]]:
         func_name = func_call.get("name", "")
         func = self._function_map.get(func_name, None)
 
@@ -116,20 +117,22 @@ class HadesAgent(ConversableAgent):
             "content": str(content),
         }
 
-    def _print_received_message(self, message: Union[Dict, str], sender: Agent):
-        output = {}
-        output["sender"] = sender.name
-        output["reciever"] = self.name
-        # print the message received
+    def _print_received_message(self, message: Union[Dict, str], sender: "Agent"):
+        output = {
+            "sender": sender.name,
+            "receiver": self.name,
+            "timestamp": get_timestamp(),
+        }
+
         message = self._message_to_dict(message)
         if message["content"] is not None:
             output["message"] = message["content"]
 
-        if message.get("tool_responses"):  # Handle tool multi-call responses
+        if message.get("tool_responses"):
             for tool_response in message["tool_responses"]:
                 self._print_received_message(tool_response, sender)
             if message.get("role") == "tool":
-                return  # If role is tool, then content is just a concatenation of all tool_responses
+                return
 
         if message.get("role") in ["function", "tool"]:
             if message["role"] == "function":
@@ -139,6 +142,7 @@ class HadesAgent(ConversableAgent):
             id = message.get(id_key, "No id found")
         else:
             content = message.get("content")
+
             if content is not None:
                 if "context" in message:
                     content = OpenAIWrapper.instantiate(
@@ -146,25 +150,37 @@ class HadesAgent(ConversableAgent):
                         message["context"],
                         self.llm_config and self.llm_config.get("allow_format_str_template", False),
                     )
+
             if "function_call" in message and message["function_call"]:
                 output["function_call"] = []
                 function_call = dict(message["function_call"])
                 arguments = function_call.get("arguments", "(No arguments found)")
-                arguments = json.loads(arguments)["args"]
+                try:
+                    arguments = json.loads(arguments)
+                except json.JSONDecodeError:
+                    arguments = {"raw": arguments}
                 output["function_call"].append({
+                    "name": function_call.get("name", "(No function name found)"),
                     "arguments": arguments
                 })
+
             if "tool_calls" in message and message["tool_calls"]:
                 output["tool_calls"] = []
                 for tool_call in message["tool_calls"]:
                     id = tool_call.get("id", "No tool call id found")
                     function_call = dict(tool_call.get("function", {}))
                     arguments = function_call.get("arguments", "(No arguments found)")
-                    arguments = json.loads(arguments)["args"]
+                    try:
+                        arguments = json.loads(arguments)
+                    except json.JSONDecodeError:
+                        arguments = {"raw": arguments}
                     output["tool_calls"].append({
                         "id": id,
-                        "name": function_call.get('name', '(No function name found)'),
+                        "name": function_call.get("name", "(No function name found)"),
                         "arguments": arguments
                     })
-        
+
+        if not any(k in output for k in ["message", "tool_calls", "function_call"]):
+            output["message"] = "(no content)"
+
         self.iostream.print(output)

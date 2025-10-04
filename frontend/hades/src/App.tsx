@@ -1,78 +1,52 @@
-// React imports.
-import React from 'react';
+import AddIcon from '@mui/icons-material/Add';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import { Outlet } from 'react-router';
+import { ReactRouterAppProvider } from '@toolpad/core/react-router';
+import type { Navigation } from '@toolpad/core/AppProvider';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
 
-// Material UI imports.
-import { AppProvider, type Session } from '@toolpad/core/AppProvider';
-import { DashboardLayout } from '@toolpad/core/DashboardLayout';
-
-// Local component imports.
-import GetPage from './components/GetPage';
-
-// Local hook imports.
-import useRouter from './hooks/Router';
-
-// Local constant imports.
-import FOOTER from './constants/Footer';
-import NAVIGATION from './constants/Navigation';
-import THEME from './constants/Theme';
-
-// Local asset imports.
-import Logo from './assets/hades.png'
-import ProfileImage from './assets/profile.jpg';
-
-const PROFILE = {
-  user: {
-    name: 'CW3 Vic Fernandez',
-    email: 'victor.fernandez19.mil@army.mil',
-    image: ProfileImage,
+const NAVIGATION: Navigation = [
+  {
+    kind: 'header',
+    title: 'Injects',
   },
-}
+  {
+    segment: 'injects/new',
+    title: 'Create',
+    icon: <AddIcon />,
+    pattern: 'injects/new',
+  },
+  {
+    segment: 'injects',
+    title: 'List',
+    icon: <FormatListNumberedIcon />,
+    pattern: 'injects/',
+  },
+];
 
-function App() {
-    const router = useRouter('/'); 
-    const [profile, setProfile] = React.useState<Session | null>(PROFILE);
-    const authentication = React.useMemo(
-      () => {
-        return {
-          signIn: () => {
-            setProfile(PROFILE);
-          },
-          signOut: () => {
-            //
-          },
-        };
-      },
-      []
-    );
-    return (
-      <AppProvider 
-        theme={THEME}
-        branding={{
-          title: 'HADES',
-          logo: <img src={Logo} alt="HADES Logo"/>,
-        }}
-        navigation={NAVIGATION}
-        router={router}
-        session={profile}
-        authentication={authentication}
-      >
-        <DashboardLayout
-          defaultSidebarCollapsed
-          slots={{
-            sidebarFooter: FOOTER,
-          }}
-          slotProps={{
-            toolbarAccount: {
-              localeText: {
-                signOutLabel: 'Exit'
-              },
-            }
-          }}
-        >
-          <GetPage pathname={router.pathname}/>
-        </DashboardLayout>
-      </AppProvider>
-    )
-}
+const BRANDING = {
+  title: "HADES",
+  logo: <img src="/assets/logo.png" alt="Logo"/>
+};
 
-export default App
+const nonce = document
+  .querySelector('meta[name="csp-nonce"]')
+  ?.getAttribute('content') || 'not-set';
+
+const cache = createCache({
+  key: 'css',
+  nonce: nonce,
+  prepend: true
+});
+
+
+export default function App() {
+  return (
+    <CacheProvider value={cache}>
+      <ReactRouterAppProvider navigation={NAVIGATION} branding={BRANDING}>
+        <Outlet />
+      </ReactRouterAppProvider>
+    </CacheProvider>
+  );
+}

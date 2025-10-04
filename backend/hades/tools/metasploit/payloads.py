@@ -25,7 +25,7 @@ def get_payload_metadata(filepath) -> dict[str, str]:
     
     """
     # Open the file at the filepath given and copy it's contents into memory.
-    with open(filepath, encoding="utf-8", 'r') as buffer:
+    with open(filepath, encoding="utf-8", mode="r") as buffer:
         payload = buffer.read()
     
     # Save the payload's metadata fields to variables.

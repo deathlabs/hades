@@ -8,8 +8,7 @@ from typing import Annotated, List
 # Local imports.
 from .msfconsole_args import MsfconsoleArgs
 from .payloads import get_payloads
-from hades.core import get_logger
-from hades.core.utils import get_timestamp
+from hades.core import get_logger, get_timestamp
 
 def msfconsole(args: Annotated[MsfconsoleArgs, "Metasploit arguments."]) -> str:
     """Metasploit is a tool used for exploiting cyber security vulnerabilities.

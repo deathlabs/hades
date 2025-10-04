@@ -1,6 +1,7 @@
 services:
+
   rabbitmq:
-    profiles: [ all, core, rabbitmq ]
+    profiles: [ all, rabbitmq ]
     build: rabbitmq
     image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/rabbitmq:${RABBITMQ_VERSION}
     container_name: ${APP_NAME}-rabbitmq
@@ -9,63 +10,48 @@ services:
       - "15672:15672"
     env_file:
       - .env.local
+      - .env.local.secrets
+    healthcheck:
+      start_period: 15s
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      timeout: 3s
+      interval: 5s
+      retries: 5
+
+  mcp-server:
+    profiles: [ mcp-server ]
+    build: mcp-server
+    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/mcp-server:${BACKEND_VERSION}
+    container_name: ${APP_NAME}-mcp-server
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env.local
+      - .env.local.secrets
 
   backend:
-    profiles: [ all, core, backend ]
+    profiles: [ all, backend ]
     build: backend
     image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/backend:${BACKEND_VERSION}
     container_name: ${APP_NAME}-backend
     ports:
-      - "8001:8001"
+      - "8888:8888"
     env_file:
       - .env.local
+      - .env.local.secrets
 
   frontend:
     profiles: [ all, frontend ]
-    build: frontend
+    build: 
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND: localhost:8888
+        PORT: 5173
     image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/frontend:${FRONTEND_VERSION}
     container_name: ${APP_NAME}-frontend
     ports:
-      - "8001:8001"
+      - "80:5173"
     env_file:
       - .env.local
-
-  vllm:
-    profiles: [ all, vllm ]
-    build: vllm
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/vllm:${VLLM_VERSION}
-    container_name: ${APP_NAME}-vllm
-    ports:
-      - "8001:8001"
-    env_file:
-      - .env.local
-
-  postgres:
-    profiles: [ all, postgres ]
-    build: postgres
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/postgres:${POSTGRES_VERSION}
-    container_name: ${APP_NAME}-postgres
-    ports:
-      - "5432:5432"
-    env_file:
-      - .env.local
-
-  elasticsearch:
-    profiles: [ all, observability, elasticsearch ]
-    build: elasticsearch
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/elasticsearch:${ELASTICSEARCH_VERSION}
-    container_name: ${APP_NAME}-elasticsearch
-    ports:
-      - "9200:9200"
-    env_file:
-      - .env.local
-
-  kibana:
-    profiles: [ all, observability, kibana ]
-    build: kibana
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/kibana:${KIBANA_VERSION}
-    container_name: ${APP_NAME}-kibana
-    ports:
-      - "9200:9200"
-    env_file:
-      - .env.local
+      - .env.local.secrets
