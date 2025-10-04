@@ -1,5 +1,5 @@
 FROM ubuntu:22.04 
-LABEL image.authors="Victor Fernandez III, @cyberphor"
+LABEL image.authors="Vic Fernandez III <@cyberphor>"
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update -y &&\
     apt install -y \

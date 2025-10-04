@@ -12,6 +12,7 @@ from autogen.io.base import IOStream
 from autogen.oai.client import OpenAIWrapper
 
 # Local imports.
+from hades.core import get_timestamp
 from hades.messages.rabbitmq import RabbitMQClient
 
 
@@ -116,20 +117,22 @@ class HadesAgent(ConversableAgent):
             "content": str(content),
         }
 
-    def _print_received_message(self, message: Union[Dict, str], sender: Agent):
-        output = {}
-        output["sender"] = sender.name
-        output["reciever"] = self.name
-        # print the message received
+    def _print_received_message(self, message: Union[Dict, str], sender: "Agent"):
+        output = {
+            "sender": sender.name,
+            "receiver": self.name,
+            "timestamp": get_timestamp(),
+        }
+
         message = self._message_to_dict(message)
         if message["content"] is not None:
             output["message"] = message["content"]
 
-        if message.get("tool_responses"):  # Handle tool multi-call responses
+        if message.get("tool_responses"):
             for tool_response in message["tool_responses"]:
                 self._print_received_message(tool_response, sender)
             if message.get("role") == "tool":
-                return  # If role is tool, then content is just a concatenation of all tool_responses
+                return
 
         if message.get("role") in ["function", "tool"]:
             if message["role"] == "function":
@@ -147,27 +150,37 @@ class HadesAgent(ConversableAgent):
                         message["context"],
                         self.llm_config and self.llm_config.get("allow_format_str_template", False),
                     )
-            
+
             if "function_call" in message and message["function_call"]:
                 output["function_call"] = []
                 function_call = dict(message["function_call"])
                 arguments = function_call.get("arguments", "(No arguments found)")
-                arguments = json.loads(arguments)["args"]
+                try:
+                    arguments = json.loads(arguments)
+                except json.JSONDecodeError:
+                    arguments = {"raw": arguments}
                 output["function_call"].append({
+                    "name": function_call.get("name", "(No function name found)"),
                     "arguments": arguments
                 })
-            
+
             if "tool_calls" in message and message["tool_calls"]:
                 output["tool_calls"] = []
                 for tool_call in message["tool_calls"]:
                     id = tool_call.get("id", "No tool call id found")
                     function_call = dict(tool_call.get("function", {}))
                     arguments = function_call.get("arguments", "(No arguments found)")
-                    arguments = json.loads(arguments)
+                    try:
+                        arguments = json.loads(arguments)
+                    except json.JSONDecodeError:
+                        arguments = {"raw": arguments}
                     output["tool_calls"].append({
                         "id": id,
-                        "name": function_call.get('name', '(No function name found)'),
+                        "name": function_call.get("name", "(No function name found)"),
                         "arguments": arguments
                     })
-        
+
+        if not any(k in output for k in ["message", "tool_calls", "function_call"]):
+            output["message"] = "(no content)"
+
         self.iostream.print(output)

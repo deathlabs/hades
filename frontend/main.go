@@ -44,9 +44,9 @@ func middleware(nextHandler http.Handler) http.Handler {
 
 func main() {
 	var (
-		address                         string
 		assets                          fs.FS
 		args                            []string = os.Args[1:]
+		backend                         string
 		contentSecurityPolicy           string
 		contentSecurityPolicyDirectives string
 		err                             error
@@ -60,7 +60,8 @@ func main() {
 
 	flagSet = flag.NewFlagSet("main", flag.ContinueOnError)
 	flagSet.SetOutput(writer)
-	flagSet.IntVar(&port, "port", 5173, "Port to listen for requests.")
+	flagSet.StringVar(&backend, "b", "", "The backend's IP address or domain name (e.g., backend).")
+	flagSet.IntVar(&port, "p", 0, "The port to listen to for requests.")
 
 	err = flagSet.Parse(args)
 	if err != nil {
@@ -68,7 +69,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	address = fmt.Sprintf(":%d", port)
+	if backend == "" {
+		fmt.Print("[x] An argument for the 'b' parameter is required")
+		os.Exit(1)
+	}
+
+	if port == 0 {
+		fmt.Print("[x] An argument for the 'p' parameter is required")
+		os.Exit(1)
+	}
 
 	assets, err = fs.Sub(files, "hades/dist/assets")
 	if err != nil {
@@ -80,12 +89,7 @@ func main() {
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		switch {
 		case request.URL.Path == "/",
-			request.URL.Path == "/alerts",
-			request.URL.Path == "/cases",
-			request.URL.Path == "/playbooks",
-			strings.HasPrefix(request.URL.Path, "/alerts/"),
-			strings.HasPrefix(request.URL.Path, "/cases/"),
-			strings.HasPrefix(request.URL.Path, "/playbooks/"):
+			strings.HasPrefix(request.URL.Path, "/injects/"):
 
 			// Generate a random base64 string.
 			randomBase64String, err = RandomBase64String()
@@ -95,15 +99,17 @@ func main() {
 			}
 
 			// Define our Content Security Policy directives.
-			contentSecurityPolicyDirectives = strings.Join([]string{
-				"default-src 'self'",
-				"script-src 'self' 'nonce-Nonce'",
-				"style-src 'self' 'nonce-Nonce'",
-				"style-src-elem	 'self' 'nonce-Nonce'",
-				"frame-ancestors 'self'",
-				"form-action 'self'",
-				"connect-src 'self' http://localhost:8000 http://backend:8000",
-			}, ";")
+			contentSecurityPolicyDirectives = fmt.Sprintf(
+				strings.Join([]string{
+					"default-src 'self'",
+					"script-src 'self' 'nonce-Nonce'",
+					"style-src 'self' 'nonce-Nonce'",
+					"style-src-elem	 'self' 'nonce-Nonce'",
+					"frame-ancestors 'self'",
+					"form-action 'self'",
+					"connect-src 'self' %s ws://%s",
+				}, ";"),
+				backend, backend)
 
 			// Add the random base64 string, as a nonce, to each Content Security Policy directive.
 			contentSecurityPolicy = strings.ReplaceAll(contentSecurityPolicyDirectives, "Nonce", randomBase64String)
@@ -121,7 +127,7 @@ func main() {
 
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets))))
 
-	err = http.ListenAndServe(address, middleware(mux))
+	err = http.ListenAndServe(fmt.Sprintf(":%d", port), middleware(mux))
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)

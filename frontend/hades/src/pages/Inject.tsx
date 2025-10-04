@@ -1,54 +1,42 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
+  Collapse,
   FormControl,
+  IconButton,
   InputLabel,
   Link,
   MenuItem,
   Select,
   SelectChangeEvent,
+  Step,
+  StepContent,
+  StepLabel,
+  Stepper,
   TextField,
 } from "@mui/material";
-import Alert from "@mui/material/Alert";
 import { AlertColor } from "@mui/material/Alert";
-import CloseIcon from '@mui/icons-material/Close';
-import Collapse from '@mui/material/Collapse';
-import Chip from "@mui/material/Chip";
-import IconButton from '@mui/material/IconButton';
-import Step from "@mui/material/Step";
-import StepContent from "@mui/material/StepContent";
-import StepLabel from "@mui/material/StepLabel";
-import Stepper from "@mui/material/Stepper";
+import CloseIcon from "@mui/icons-material/Close";
 import { BACKEND } from "../constants";
-
-const DefaultInjectName = "Scan the network";
-
-const DefaultNetworkId = "192.168.152.0";
-
-const DefaultSubnetMask = "255.255.255.0";
 
 const TargetTypes = [
   { key: "Machine", value: "machine" },
   { key: "Persona", value: "persona" },
-]
+];
 
-const DefaultTargetId = "192.168.152.128";
-
-const Goals = [
-  { key: "Shutdown", value: "shutdown" },
-]
+const Goals = [{ key: "Shutdown", value: "shutdown" }];
 
 const Techniques = [
   { key: "Exploiting known vulnerabilities", value: "exploiting-known-vulnerabilities" },
   { key: "Phishing via email", value: "phishing-via-email" },
   { key: "Denial-of-Service attacks", value: "denial-of-service-attacks" },
-]
-
-const DefaultAlertSeverity = "info";
+];
 
 type Target = {
   type: string;
@@ -73,68 +61,56 @@ export type NewInject = {
   systems: System[];
 };
 
-
 export default function Inject() {
-  const [injectName, setInjectName] = useState(DefaultInjectName);
-  const [networkId, setNetworkId] = useState(DefaultNetworkId);
-  const [subnetMask, setSubnetMask] = useState(DefaultSubnetMask);
-  const [targetType, setTargetType] = useState(TargetTypes[0].value);
-  const [targetId, setTargetId] = useState(DefaultTargetId);
-  const [goals, setGoals] = useState<string[]>([Goals[0].value]);
-  const [allowed, setAllowed] = useState<string[]>([Techniques[0].value]);
-  const [prohibited, setProhibited] = useState<string[]>([Techniques[Techniques.length - 1].value]);
-  const hasConflict = allowed.some(v => prohibited.includes(v));
+  const [injectName, setInjectName] = useState("");
+  const [networkId, setNetworkId] = useState("");
+  const [subnetMask, setSubnetMask] = useState("");
+  const [targetType, setTargetType] = useState(TargetTypes[0]?.value || "");
+  const [targetId, setTargetId] = useState("");
+  const [goals, setGoals] = useState<string[]>([]);
+  const [allowed, setAllowed] = useState<string[]>([]);
+  const [prohibited, setProhibited] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState<AlertColor>(DefaultAlertSeverity);
+  const [alertSeverity, setAlertSeverity] = useState<AlertColor>("info");
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const navigate = useNavigate();
- 
+
+  const hasConflict = allowed.some((v) => prohibited.includes(v));
+
   const handleNext = () => {
     setShowAlert(false);
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setActiveStep((prev) => prev + 1);
   };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    resetForm();
-  };
+  const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const handleGoals = (event: SelectChangeEvent<typeof goals>) => {
-    const { target: { value } } = event;
-    setGoals(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    const { value } = event.target;
+    setGoals(typeof value === "string" ? value.split(",") : value);
   };
 
   const handleAllowed = (event: SelectChangeEvent<typeof allowed>) => {
-    const { target: { value } } = event;
-    setAllowed(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    const { value } = event.target;
+    setAllowed(typeof value === "string" ? value.split(",") : value);
   };
 
-  const handleProhibited = (event: SelectChangeEvent<typeof allowed>) => {
-    const { target: { value } } = event;
-    setProhibited(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+  const handleProhibited = (event: SelectChangeEvent<typeof prohibited>) => {
+    const { value } = event.target;
+    setProhibited(typeof value === "string" ? value.split(",") : value);
   };
 
   const resetForm = () => {
     setActiveStep(0);
-    setInjectName(DefaultInjectName);
-    setNetworkId(DefaultNetworkId);
-    setSubnetMask(DefaultSubnetMask);
-    setTargetType(TargetTypes[0].value);
-    setTargetId(DefaultTargetId);
-    setGoals([Goals[0].value]);
-    setAllowed([Techniques[0].value]);
-    setProhibited([Techniques[Techniques.length - 1].value]);
+    setInjectName("");
+    setNetworkId("");
+    setSubnetMask("");
+    setTargetType(TargetTypes[0]?.value || "");
+    setTargetId("");
+    setGoals([]);
+    setAllowed([]);
+    setProhibited([]);
   };
 
   useEffect(() => {
@@ -153,10 +129,7 @@ export default function Inject() {
     const inject: NewInject = {
       name: injectName,
       rules_of_engagement: {
-        techniques: {
-          allowed: allowed,
-          prohibited: prohibited,
-        },
+        techniques: { allowed, prohibited },
       },
       systems: [
         {
@@ -166,7 +139,7 @@ export default function Inject() {
             {
               type: targetType,
               address: targetId,
-              goals: goals,
+              goals,
             },
           ],
         },
@@ -176,15 +149,11 @@ export default function Inject() {
     try {
       const response = await fetch(`http://${BACKEND}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(inject),
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const text = await response.json();
       setLoading(false);
@@ -197,139 +166,159 @@ export default function Inject() {
     }
   };
 
+  const stepValid = [
+    !!injectName.trim(),
+    !!networkId.trim() && !!subnetMask.trim(),
+    !!targetType.trim() && !!targetId.trim(),
+    goals.length > 0 && allowed.length > 0 && prohibited.length > 0 && !hasConflict,
+    true,
+  ];
+
   const steps = [
     {
       label: "Name the inject",
-      content: <>
+      content: (
         <TextField
           label="Inject Name"
+          placeholder="e.g., Scan the network"
           required
           value={injectName}
           onChange={(e) => setInjectName(e.target.value)}
         />
-      </>,
+      ),
     },
     {
       label: "Identify the network",
-      content: <>
-        <TextField
-          label="Network ID"
-          required
-          value={networkId}
-          onChange={(e) => setNetworkId(e.target.value)}
-        />
-        <TextField
-          label="Subnet Mask"
-          required
-          value={subnetMask}
-          onChange={(e) => setSubnetMask(e.target.value)}
-        />
-      </>
+      content: (
+        <>
+          <TextField
+            label="Network ID"
+            placeholder="e.g., 192.168.152.0"
+            required
+            value={networkId}
+            onChange={(e) => setNetworkId(e.target.value)}
+          />
+          <TextField
+            label="Subnet Mask"
+            placeholder="e.g., 255.255.255.0"
+            required
+            value={subnetMask}
+            onChange={(e) => setSubnetMask(e.target.value)}
+          />
+        </>
+      ),
     },
     {
       label: "Identify a target on the network",
-      content: <>
-        <FormControl>
-          <InputLabel>Target Type</InputLabel>
-          <Select
-            label="Target Type"
+      content: (
+        <>
+          <FormControl>
+            <InputLabel>Target Type</InputLabel>
+            <Select
+              label="Target Type"
+              required
+              value={targetType}
+              onChange={(e) => setTargetType(e.target.value)}
+            >
+              {TargetTypes.map((t) => (
+                <MenuItem key={t.value} value={t.value}>
+                  {t.key}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Target ID"
+            placeholder="e.g., 192.168.152.128"
             required
-            value={targetType}
-            onChange={(e) => setTargetType(e.target.value)}
-          >
-            {TargetTypes.map((targetType) => (
-            <MenuItem key={targetType.value} value={targetType.value}>
-              {targetType.key}
-            </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          label="Target ID"
-          required
-          value={targetId}
-          onChange={(e) => setTargetId(e.target.value)}
-        />
-      </>
+            value={targetId}
+            onChange={(e) => setTargetId(e.target.value)}
+          />
+        </>
+      ),
     },
     {
       label: "Identify the rules of engagement",
-      content: <>
-        <FormControl>
-          <InputLabel>Goals</InputLabel>
-          <Select
-            label="Goals"
-            required
-            multiple
-            value={goals}
-            onChange={handleGoals}
-            renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
+      content: (
+        <>
+          <FormControl>
+            <InputLabel>Goals</InputLabel>
+            <Select
+              label="Goals"
+              required
+              multiple
+              value={goals}
+              onChange={handleGoals}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => {
+                    const g = Goals.find((goal) => goal.value === value);
+                    return <Chip key={value} label={g ? g.key : value} />;
+                  })}
+                </Box>
+              )}
+            >
+              {Goals.map((goal) => (
+                <MenuItem key={goal.value} value={goal.value}>
+                  {goal.key}
+                </MenuItem>
               ))}
-            </Box>
-          )}
-          >
-            {Goals.map((goal) => (
-            <MenuItem key={goal.value} value={goal.value}>
-              {goal.key}
-            </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl>
-          <InputLabel>Allowed Techniques</InputLabel>
-          <Select
-            label="Allowed Techniques"
-            required
-            multiple
-            value={allowed}
-            onChange={handleAllowed}
-            renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <InputLabel>Allowed Techniques</InputLabel>
+            <Select
+              label="Allowed Techniques"
+              required
+              multiple
+              value={allowed}
+              onChange={handleAllowed}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => {
+                    const t = Techniques.find((tech) => tech.value === value);
+                    return <Chip key={value} label={t ? t.key : value} />;
+                  })}
+                </Box>
+              )}
+            >
+              {Techniques.map((technique) => (
+                <MenuItem key={technique.value} value={technique.value}>
+                  {technique.key}
+                </MenuItem>
               ))}
-            </Box>
-          )}
-          >
-            {Techniques.map((technique) => (
-            <MenuItem key={technique.value} value={technique.value}>
-              {technique.key}
-            </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl>
-          <InputLabel>Prohibited Techniques</InputLabel>
-          <Select
-            label="Prohibited Techniques"
-            required
-            multiple
-            value={prohibited}
-            onChange={handleProhibited}
-            renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
+            </Select>
+          </FormControl>
+
+          <FormControl>
+            <InputLabel>Prohibited Techniques</InputLabel>
+            <Select
+              label="Prohibited Techniques"
+              required
+              multiple
+              value={prohibited}
+              onChange={handleProhibited}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => {
+                    const t = Techniques.find((tech) => tech.value === value);
+                    return <Chip key={value} label={t ? t.key : value} />;
+                  })}
+                </Box>
+              )}
+            >
+              {Techniques.map((technique) => (
+                <MenuItem key={technique.value} value={technique.value}>
+                  {technique.key}
+                </MenuItem>
               ))}
-            </Box>
-          )}
-          >
-            {Techniques.map((technique) => (
-            <MenuItem key={technique.value} value={technique.value}>
-              {technique.key}
-            </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </>,
+            </Select>
+          </FormControl>
+        </>
+      ),
     },
-    {
-      label: "Submit the inject",
-      content: ""
-    }
+    { label: "Submit the inject", content: "" },
   ];
 
   return (
@@ -339,25 +328,19 @@ export default function Inject() {
           severity={alertSeverity}
           sx={{ m: 2 }}
           action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => { setShowAlert(false); }}
-            >
+            <IconButton color="inherit" size="small" onClick={() => setShowAlert(false)}>
               <CloseIcon fontSize="inherit" />
             </IconButton>
           }
         >
           {alertMessage.startsWith("inject-") ? (
-          <Link href={`/injects/${alertMessage.replace(/^inject-/, "")}`}>
-            Inject submitted!
-          </Link>
+            <Link href={`/injects/${alertMessage.replace(/^inject-/, "")}`}>Inject submitted!</Link>
           ) : (
             alertMessage
           )}
         </Alert>
       </Collapse>
+
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((step, index) => (
           <Step key={step.label}>
@@ -369,14 +352,10 @@ export default function Inject() {
                   <Box sx={{ mb: 2 }}>
                     <Button
                       variant="contained"
-                      loading={loading}
-                      disabled={hasConflict}
+                      disabled={!stepValid[index] || hasConflict || loading}
                       onClick={() => {
-                        if (index === steps.length - 1) {
-                          submitInject();
-                        } else {
-                          handleNext();
-                        }
+                        if (index === steps.length - 1) submitInject();
+                        else handleNext();
                       }}
                       sx={{ mt: 1, mr: 1 }}
                     >
@@ -389,10 +368,7 @@ export default function Inject() {
                     >
                       Back
                     </Button>
-                    <Button
-                      onClick={handleReset}
-                      sx={{ mt: 1, mr: 1 }}
-                    >
+                    <Button onClick={resetForm} sx={{ mt: 1, mr: 1 }}>
                       Reset
                     </Button>
                   </Box>

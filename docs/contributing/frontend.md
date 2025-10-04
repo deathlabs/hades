@@ -1,5 +1,5 @@
-## Frontend
-The steps below describe how the `frontend` service was created.
+## How the `frontend` microservice was Initialized Locally
+The steps below describe how the `frontend` service was initialized locally before it was containerized.
 
 **Step 1.** Install the Node Version Manager (NVM) if it's not already installed.
 ```bash

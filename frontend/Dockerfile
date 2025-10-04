@@ -1,6 +1,8 @@
 FROM alpine:3.22 AS stage_1
 ARG NODE_VERSION=v24.8.0
+ARG VITE_BACKEND
 ENV NODE_VERSION=${NODE_VERSION}
+ENV VITE_BACKEND=${VITE_BACKEND}
 SHELL [ "/bin/ash", "-eo", "pipefail", "-c" ]
 WORKDIR /home/hades/
 COPY hades/ .
@@ -25,7 +27,18 @@ RUN apk add --no-cache curl gcompat &&\
     export PATH=$PATH:/usr/local/go/bin &&\
     go build -ldflags="-s -w" -o server
 
-FROM scratch AS stage_3
+FROM alpine:3.22 AS stage_3
+ARG VITE_BACKEND
+ARG PORT
+ENV VITE_BACKEND=${VITE_BACKEND}
+ENV PORT=${PORT}
 LABEL image.authors="Vic Fernandez III <@cyberphor>"
+WORKDIR /home/hades/
 COPY --from=stage_2 /home/server server
-ENTRYPOINT [ "./server" ]
+COPY entrypoint.sh entrypoint.sh
+RUN adduser -D hades -h /home/hades &&\
+    chown -R hades:hades /home/hades &&\
+    chmod +x server &&\
+    chmod +x entrypoint.sh
+USER hades
+ENTRYPOINT [ "./entrypoint.sh" ]

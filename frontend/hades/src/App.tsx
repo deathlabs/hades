@@ -27,7 +27,7 @@ const NAVIGATION: Navigation = [
 
 const BRANDING = {
   title: "HADES",
-  logo: <img src="/logo.png" alt="Logo"/>
+  logo: <img src="/assets/logo.png" alt="Logo"/>
 };
 
 const nonce = document
