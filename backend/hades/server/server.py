@@ -124,11 +124,12 @@ class HadesServer:
                 },
                 {
                     "tags": ["local", "mistral-7b"],
-                    "model": "mistral-7b-instruct-v0.1.Q5_K_M.gguf",
-                    "api_key": api_key,
-                    "api_type": "openai",
-                    "base_url": "http://localhost:8000/api",
+                    "model": "mistral-7b-instruct-v0.2.Q6_K.gguf",
+                    "api_key": None,
                     "cache_seed": None,
+                    "api_type": "openai",
+                    "base_url": "http://llama:9999/v1",
+                    "timeout": 90, 
                 },
             ],
             filter_dict={"tags": [llm_tag]}

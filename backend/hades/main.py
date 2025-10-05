@@ -91,7 +91,7 @@ async def new_inject(request: Request):
         logger=logger,
         output_method="rabbitmq",
         rabbitmq_client=rabbitmq_client,
-        llm_tag=LLM_TAGS[0],
+        llm_tag="local",
         tools=[nmap, msfconsole]
     )
 
