@@ -1,3 +1,12 @@
+<style>
+  table {
+    border-collapse: collapse; 
+  }
+
+  table, th, td {
+    border: none; 
+  }
+</style>
 <table>
   <tr>
     <td rowspan="3" align="center" valign="middle">
@@ -7,6 +16,7 @@
       <h2><code>HADES</code></h2>
       Harnessing AI to Disrupt and Evaluate Security (HADES)
       <ul>
+        <li><a href="#introduction">Introduction</a></li>
         <li><a href="#getting-started">Getting Started</a></li>
         <li><a href="docs/architecture/README.md">Architecture</a></li>
         <li><a href="docs/contributing/README.md">Contributing</a></li>
@@ -16,6 +26,13 @@
     </td>
   </tr>
 </table>
+
+## Introduction
+HADES is a a cyber adversary emulation app built to promote decentralized cyber defense training. It's for when cyber defenders need a red team to practice against, but the time, money, or people they have available doesn't support their training requirements. 
+
+Have you ever been told you have to wait for annual training exercise to test your mettle against a realistic threat? What about funding--do you need a dirt cheap option for developing your blue team skills where your tools are? Then, HADES is for you! 
+
+HADES was built by a cyber defender who is tired of being on a "blue team bench warmer" and eager to defend the network.
 
 ## Getting Started
 Follow the steps below if you want to run HADES (these instructions assume you already have `git`, `make`, and `docker` installed as well as a valid OpenAI API key). For more information, please [read the docs](docs/README.md).
