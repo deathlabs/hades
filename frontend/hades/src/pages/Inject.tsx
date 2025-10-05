@@ -30,7 +30,10 @@ const TargetTypes = [
   { key: "Persona", value: "persona" },
 ];
 
-const Goals = [{ key: "Shutdown", value: "shutdown" }];
+const Goals = [
+  { key: "Scan", value: "scan" },
+  { key: "Shutdown", value: "shutdown" },
+];
 
 const Techniques = [
   { key: "Exploiting known vulnerabilities", value: "exploiting-known-vulnerabilities" },
