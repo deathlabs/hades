@@ -1,3 +1,3 @@
-## `hades`
-* [Architecture](architecture/README.md)
-* [Contributing](contributing/README.md)
+## HADES
+* [HADES Architecture](architecture/README.md)
+* [Contributing to HADES](contributing/README.md)

@@ -1,5 +1,5 @@
-## `hades`
-If you want to develop and/or contribute to `hades`, follow the instructions below in the order they are listed (again, these instructions assume you already have `git`, `make`, and `docker` installed as well as a valid OpenAI API key).
+## Contributing to HADES
+If you want to develop and/or contribute to HADES, follow the instructions below in the order they are listed (again, these instructions assume you already have `git`, `make`, and `docker` installed as well as a valid OpenAI API key).
 * [Setting up the `rabbitmq` Microservice](#setting-up-the-rabbitmq-microservice)
 * [Setting Up a Local Development Environment to Contribute to the `backend` Microservice](#setting-up-a-local-development-environment-to-contribute-to-the-backend-microservice)
 * [Setting Up a Local Development Environment to Contribute to the `frontend` Microservice](#setting-up-a-local-development-environment-to-contribute-to-the-frontend-microservice)

@@ -4,8 +4,7 @@
       <img src="hades.svg" width="250" height="250" alt="HADES Logo" />
     </td>
     <td>
-      <h2><code>HADES</code></h2>
-      Harnessing AI to Disrupt and Evaluate Security (HADES)
+      <h2>Harnessing AI to Disrupt and Evaluate Security (HADES)</h2>
       <ul>
         <li><a href="#introduction">Introduction</a></li>
         <li><a href="#getting-started">Getting Started</a></li>
@@ -41,12 +40,12 @@ RABBITMQ_PASSWORD=hades
 OPENAI_API_KEY=sk-...
 ``` 
 
-**Step 3.** Build all the containers that makeup `hades` using the provided `Makefile`.  
+**Step 3.** Build all the containers that makeup HADES using the provided `Makefile`.  
 ```bash
 make
 ```
 
-**Step 4.** Start `hades` using the command below using the provided `Makefile`.
+**Step 4.** Start HADES using the command below using the provided `Makefile`.
 ```bash
 make start
 ```
