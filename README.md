@@ -1,10 +1,10 @@
+## Harnessing AI to Disrupt and Evaluate Security (HADES)
 <table>
   <tr>
     <td rowspan="3" align="center" valign="middle">
       <img src="hades.svg" width="250" height="250" alt="HADES Logo" />
     </td>
     <td>
-      <h2>Harnessing AI to Disrupt and Evaluate Security (HADES)</h2>
       <ul>
         <li><a href="#introduction">Introduction</a></li>
         <li><a href="#getting-started">Getting Started</a></li>
