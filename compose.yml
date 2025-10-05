@@ -59,7 +59,7 @@ services:
   llama:
     profiles: [ llama ]
     build: llama
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/llama:${LLM_VERSION}
+    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/llama:${LLAMA_VERSION}
     container_name: ${APP_NAME}-llama
     ports:
       - "9999:9999"
