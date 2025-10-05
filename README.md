@@ -1,12 +1,3 @@
-<style>
-  table {
-    border-collapse: collapse; 
-  }
-
-  table, th, td {
-    border: none; 
-  }
-</style>
 <table>
   <tr>
     <td rowspan="3" align="center" valign="middle">
