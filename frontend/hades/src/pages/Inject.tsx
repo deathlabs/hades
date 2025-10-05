@@ -196,7 +196,7 @@ export default function Inject() {
         <>
           <TextField
             label="Network ID"
-            placeholder="e.g., 192.168.152.0"
+            placeholder="e.g., 192.168.177.0"
             required
             value={networkId}
             onChange={(e) => setNetworkId(e.target.value)}
@@ -232,7 +232,7 @@ export default function Inject() {
           </FormControl>
           <TextField
             label="Target ID"
-            placeholder="e.g., 192.168.152.128"
+            placeholder="e.g., 192.168.177.128"
             required
             value={targetId}
             onChange={(e) => setTargetId(e.target.value)}
