@@ -42,7 +42,7 @@ services:
 
   frontend:
     profiles: [ all, frontend ]
-    build: 
+    build:
       context: frontend
       dockerfile: Dockerfile
       args:
@@ -55,3 +55,19 @@ services:
     env_file:
       - .env.local
       - .env.local.secrets
+
+  llama:
+    profiles: [ llama ]
+    build: llama
+    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/llama:${LLM_VERSION}
+    container_name: ${APP_NAME}-llama
+    ports:
+      - "9999:9999"
+    env_file:
+      - .env.local
+      - .env.local.secrets
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:9999/api/healthcheck" ]
+      timeout: 3s
+      interval: 5s
+      retries: 5
