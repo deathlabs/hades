@@ -20,7 +20,7 @@ class ChatRequest(BaseModel):
     model: str
     messages: list[ChatMessage]
     temperature: float = 0.7
-    max_tokens: int = 256
+    max_tokens: int = 1024
 
 @api.post("/v1/chat/completions")
 async def chat_completion(request: ChatRequest):

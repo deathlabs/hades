@@ -183,7 +183,7 @@ export default function Inject() {
       content: (
         <TextField
           label="Inject Name"
-          placeholder="e.g., Scan the network"
+          placeholder="Hack the planet"
           required
           value={injectName}
           onChange={(e) => setInjectName(e.target.value)}
@@ -196,14 +196,14 @@ export default function Inject() {
         <>
           <TextField
             label="Network ID"
-            placeholder="e.g., 192.168.177.0"
+            placeholder="192.168.177.0"
             required
             value={networkId}
             onChange={(e) => setNetworkId(e.target.value)}
           />
           <TextField
             label="Subnet Mask"
-            placeholder="e.g., 255.255.255.0"
+            placeholder="255.255.255.0"
             required
             value={subnetMask}
             onChange={(e) => setSubnetMask(e.target.value)}
@@ -232,7 +232,7 @@ export default function Inject() {
           </FormControl>
           <TextField
             label="Target ID"
-            placeholder="e.g., 192.168.177.128"
+            placeholder="192.168.177.128"
             required
             value={targetId}
             onChange={(e) => setTargetId(e.target.value)}
