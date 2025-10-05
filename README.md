@@ -22,7 +22,7 @@ HADES is a a cyber adversary emulation app built to promote decentralized cyber 
 
 Have you ever been told you have to wait for annual training exercise to test your mettle against a realistic threat? What about funding? Do you need a dirt cheap option for developing your blue team skills where your tools are? Then, HADES is for you! 
 
-HADES was built by a cyber defender who is tired of being on "blue team bench warmer" and eager to defend the network.
+HADES was built by a cyber defender who was tired of being a "blue team bench warmer" and eager to defend the network.
 
 ## Getting Started
 Follow the steps below if you want to run HADES (these instructions assume you already have `git`, `make`, and `docker` installed as well as a valid OpenAI API key). For more information, please [read the docs](docs/README.md).
