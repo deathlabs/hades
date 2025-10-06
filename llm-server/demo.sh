@@ -10,3 +10,5 @@ curl -X POST http://localhost:9999/v1/chat/completions \
     "temperature": 0.7,
     "max_tokens": 128
   }'
+
+echo ""
