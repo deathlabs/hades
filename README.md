@@ -18,9 +18,9 @@
 </table>
 
 ## Introduction
-HADES is a a cyber adversary emulation app built to promote decentralized cyber defense training. It's for when cyber defenders need a red team to practice against, but the time, money, or people they have available doesn't support their training needs. 
+HADES is a cyber adversary emulation app. It's for when cyber defenders need a red team to practice against, but they can't afford to coordinate or host one.
 
-Have you ever been told you have to wait for annual training exercise to test your mettle against a realistic threat? What about funding? Do you need a dirt cheap option for developing your blue team skills where your tools are? Then, HADES is for you! 
+Have you ever been told you have to wait for an annual training exercise to test your mettle against a realistic threat? What about funding? Do you need a dirt cheap option for developing your blue team skills where your tools are? Then, HADES is for you! 
 
 HADES was built by a cyber defender who was tired of being a "blue team bench warmer" and eager to defend the network.
 
@@ -33,7 +33,7 @@ git clone https://github.com/deathlabs/hades
 cd hades
 ```
 
-**Step 2.** Create a file called `.env.local.secrets` and add the content below to it. Ensure the value used for `OPENAI_API_KEY` is an actual OpenAI API key.
+**Step 2.** Create a file called `.env.local.secrets` in the same directory as the provided `.env.local` file is located. Then, add the content below to it. Ensure the value used for `OPENAI_API_KEY` is an actual OpenAI API key.
 ```bash
 RABBITMQ_USERNAME=hades
 RABBITMQ_PASSWORD=hades

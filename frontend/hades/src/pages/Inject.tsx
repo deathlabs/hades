@@ -48,8 +48,6 @@ type Target = {
 };
 
 type System = {
-  network_id: string;
-  subnet_mask: string;
   targets: Target[];
 };
 
@@ -66,8 +64,6 @@ export type NewInject = {
 
 export default function Inject() {
   const [injectName, setInjectName] = useState("");
-  const [networkId, setNetworkId] = useState("");
-  const [subnetMask, setSubnetMask] = useState("");
   const [targetType, setTargetType] = useState(TargetTypes[0]?.value || "");
   const [targetId, setTargetId] = useState("");
   const [goals, setGoals] = useState<string[]>([]);
@@ -107,8 +103,6 @@ export default function Inject() {
   const resetForm = () => {
     setActiveStep(0);
     setInjectName("");
-    setNetworkId("");
-    setSubnetMask("");
     setTargetType(TargetTypes[0]?.value || "");
     setTargetId("");
     setGoals([]);
@@ -136,13 +130,11 @@ export default function Inject() {
       },
       systems: [
         {
-          network_id: networkId,
-          subnet_mask: subnetMask,
           targets: [
             {
               type: targetType,
               address: targetId,
-              goals,
+              goals: goals,
             },
           ],
         },
@@ -171,7 +163,6 @@ export default function Inject() {
 
   const stepValid = [
     !!injectName.trim(),
-    !!networkId.trim() && !!subnetMask.trim(),
     !!targetType.trim() && !!targetId.trim(),
     goals.length > 0 && allowed.length > 0 && prohibited.length > 0 && !hasConflict,
     true,
@@ -183,32 +174,11 @@ export default function Inject() {
       content: (
         <TextField
           label="Inject Name"
-          placeholder="e.g., Scan the network"
+          placeholder="Hack the planet"
           required
           value={injectName}
           onChange={(e) => setInjectName(e.target.value)}
         />
-      ),
-    },
-    {
-      label: "Identify the network",
-      content: (
-        <>
-          <TextField
-            label="Network ID"
-            placeholder="e.g., 192.168.177.0"
-            required
-            value={networkId}
-            onChange={(e) => setNetworkId(e.target.value)}
-          />
-          <TextField
-            label="Subnet Mask"
-            placeholder="e.g., 255.255.255.0"
-            required
-            value={subnetMask}
-            onChange={(e) => setSubnetMask(e.target.value)}
-          />
-        </>
       ),
     },
     {
@@ -232,7 +202,7 @@ export default function Inject() {
           </FormControl>
           <TextField
             label="Target ID"
-            placeholder="e.g., 192.168.177.128"
+            placeholder="192.168.177.128"
             required
             value={targetId}
             onChange={(e) => setTargetId(e.target.value)}
@@ -268,7 +238,6 @@ export default function Inject() {
               ))}
             </Select>
           </FormControl>
-
           <FormControl>
             <InputLabel>Allowed Techniques</InputLabel>
             <Select
@@ -293,7 +262,6 @@ export default function Inject() {
               ))}
             </Select>
           </FormControl>
-
           <FormControl>
             <InputLabel>Prohibited Techniques</InputLabel>
             <Select

@@ -1,0 +1,5 @@
+fastapi
+huggingface_hub
+llama-cpp-python
+pydantic
+uvicorn

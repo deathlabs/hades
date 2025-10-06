@@ -19,6 +19,7 @@ export OPENAI_API_KEY="sk-..."
 In the same terminal window, enter the commands below (from the root of the project directory).
 ```bash
 cd backend
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt 
 export RABBITMQ_ADDRESS="localhost"

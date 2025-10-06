@@ -1,7 +1,7 @@
 """Defines a HADES Server."""
 
 # Standard library imports.
-from json import dumps, loads
+from json import loads
 from logging import Logger
 from typing import Any, Callable, Dict, List
 from os import environ
@@ -17,15 +17,7 @@ from autogen import filter_config, register_function, UserProxyAgent
 # Local imports.
 from .task_matrix import get_task_matrix
 from hades.agents import HadesOperator, HadesPlanner
-from hades.core import (
-    LLM_TAGS,
-    RABBITMQ_ADDRESS,
-    RABBITMQ_PASSWORD,
-    RABBITMQ_PORT,
-    RABBITMQ_REPORT_EXCHANGE_NAME,
-    RABBITMQ_USERNAME,
-    USER_PROXY_AGENT_NAME
-)
+from hades.core import USER_PROXY_AGENT_NAME
 from hades.messages.rabbitmq import RabbitMQClient
 
 
@@ -105,15 +97,17 @@ class HadesServer:
             case _:
                 return None
 
-    def __get_llm_config(self, llm_tag: str = "openai") -> Dict[str, Any]:
+    def __get_llm_config(self, llm_tag: str) -> Dict[str, Any]:
         """Returns the LLM config that corresponds with the LLM tag given.
 
         Returns:
             list[dict[str, Any]]: Text goes here.
 
         """
-        # TODO: refactor so an API key is only loaded if the 'openai' or 'gpt-4o' tags are selected.
-        api_key = self.__get_api_key(llm_tag)
+        if llm_tag in ["openai", "gpt4-0"]:
+            api_key = self.__get_api_key(llm_tag)
+        else:
+            api_key = None
         return filter_config(
             config_list=[
                 {
@@ -124,11 +118,12 @@ class HadesServer:
                 },
                 {
                     "tags": ["local", "mistral-7b"],
-                    "model": "mistral-7b-instruct-v0.1.Q5_K_M.gguf",
-                    "api_key": api_key,
-                    "api_type": "openai",
-                    "base_url": "http://localhost:8000/api",
+                    "model": "mistral-7b-instruct-v0.2.Q6_K.gguf",
+                    "api_key": None,
                     "cache_seed": None,
+                    "api_type": "openai",
+                    "base_url": "http://llm-server:9999/v1",
+                    "timeout": 120, 
                 },
             ],
             filter_dict={"tags": [llm_tag]}
@@ -177,15 +172,18 @@ class HadesServer:
         # Parse the metadata provided.
         inject_id = request.get("id", "")
         inject_name = request.get("name", "")
-        scenario = {"address": "192.168.152.1"}
+        scenario = {}
+        scenario["address"] = "192.168.152.1"
+        scenario["allowed"] = request.get("rules_of_engagement", {}).get("techniques", {}).get("allowed", [])
+        scenario["prohibited"] = request.get("rules_of_engagement", {}).get("techniques", {}).get("prohibited", [])
         systems = request.get("systems", [])
         self.logger.info(f"starting '{inject_name}' (Inject #{inject_id})")
         # Process the inject.
         for system in systems:
             # Process the provided list of high-value targets.
-            # TODO: add code to handle situations where no high-value targets are provided.
+            # TODO: add code to handle situations where no targets are provided.
             for target in system["targets"]:
-                # Build a task list based on the target type (e.g., machine or user).
+                # Build a task list based on the target type (e.g., machine or persona).
                 match target["type"]:
                     case "machine":
                         address = target["address"]

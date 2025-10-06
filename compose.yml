@@ -18,17 +18,6 @@ services:
       interval: 5s
       retries: 5
 
-  mcp-server:
-    profiles: [ mcp-server ]
-    build: mcp-server
-    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/mcp-server:${BACKEND_VERSION}
-    container_name: ${APP_NAME}-mcp-server
-    ports:
-      - "8001:8001"
-    env_file:
-      - .env.local
-      - .env.local.secrets
-
   backend:
     profiles: [ all, backend ]
     build: backend
@@ -42,7 +31,7 @@ services:
 
   frontend:
     profiles: [ all, frontend ]
-    build: 
+    build:
       context: frontend
       dockerfile: Dockerfile
       args:
@@ -52,6 +41,33 @@ services:
     container_name: ${APP_NAME}-frontend
     ports:
       - "80:5173"
+    env_file:
+      - .env.local
+      - .env.local.secrets
+
+  llm-server:
+    profiles: [ llm-server ]
+    build: llm-server
+    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/llm-server:${LLM_SERVER_VERSION}
+    container_name: ${APP_NAME}-llm-server
+    ports:
+      - "9999:9999"
+    env_file:
+      - .env.local
+      - .env.local.secrets
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:9999/healthcheck" ]
+      timeout: 3s
+      interval: 5s
+      retries: 5
+
+  mcp-server:
+    profiles: [ mcp-server ]
+    build: mcp-server
+    image: ${CONTAINER_REGISTRY}/${CI_PROJECT_PATH}/mcp-server:${MCP_SERVER_VERSION}
+    container_name: ${APP_NAME}-mcp-server
+    ports:
+      - "8001:8001"
     env_file:
       - .env.local
       - .env.local.secrets
